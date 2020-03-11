@@ -25,8 +25,9 @@ int main() {
         return false;
     }
 
+    //非阻塞设置，成功 返回0， 失败返回SOCKET_ERROR错误，可通过WSAGetLastError()获取相应错误代码
     int iMode = 0; //1:非阻塞，0：阻塞
-    re = ioctlsocket(servSock, FIONBIO, (u_long FAR*) & iMode); //非阻塞设置，成功 返回0， 失败返回SOCKET_ERROR错误，可通过WSAGetLastError()获取相应错误代码
+    re = ioctlsocket(servSock, FIONBIO, (u_long FAR*) & iMode); 
     if (re != 0)
     {
         std::cout << "3, re = " << re << ", " << WSAGetLastError() << std::endl;
