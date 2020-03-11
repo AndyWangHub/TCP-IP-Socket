@@ -1,43 +1,32 @@
-#ifndef _WINSOCK_DEPRECATED_NO_WARNINGS
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
-#endif // !_WINSOCK_DEPRECATED_NO_WARNINGS
-
 #include <stdio.h>
 #include <iostream>
 #include <winsock2.h>
-#pragma comment (lib, "ws2_32.lib")  //Âä†ËΩΩ ws2_32.dll
+#pragma comment (lib, "ws2_32.lib")  //º”‘ÿ ws2_32.dll
 
-int main(){
+int main() {
 
     int re = 0;
-    //ÂàùÂßãÂåñ DLL
+    //≥ı ºªØ DLL
     WSADATA wsaData;
     re = WSAStartup(MAKEWORD(2, 2), &wsaData);
-    if(re != 0)
-	{
+    if (re != 0)
+    {
         std::cout << "1, re = " << re << ", " << WSAGetLastError() << std::endl;
         system("pause");
-		return false;
-	}
+        return false;
+    }
 
-    //ÂàõÂª∫Â•óÊé•Â≠ó
+    //¥¥Ω®Ã◊Ω”◊÷
     SOCKET servSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if(servSock == INVALID_SOCKET)
-	{
+    if (servSock == INVALID_SOCKET)
+    {
         std::cout << "2: " << WSAGetLastError() << std::endl;
         system("pause");
-		return false;
-	}
+        return false;
+    }
 
-    //ÁªëÂÆöÂ•óÊé•Â≠ó
-    sockaddr_in sockAddr;
-    memset(&sockAddr, 0, sizeof(sockAddr));  //ÊØè‰∏™Â≠óËäÇÈÉΩÁî®0Â°´ÂÖÖ
-    sockAddr.sin_family = PF_INET;  //‰ΩøÁî®IPv4Âú∞ÂùÄ
-    sockAddr.sin_addr.s_addr = inet_addr("127.0.0.1");  //ÂÖ∑‰ΩìÁöÑIPÂú∞ÂùÄ
-    sockAddr.sin_port = htons(1234);  //Á´ØÂè£
-	
-	int iMode = 0; //1:ÈùûÈòªÂ°ûÔºå0ÔºöÈòªÂ°û
-    re = ioctlsocket(servSock, FIONBIO, (u_long FAR*) & iMode); //ÈùûÈòªÂ°ûËÆæÁΩÆÔºåÊàêÂäü ËøîÂõû0Ôºå Â§±Ë¥•ËøîÂõûSOCKET_ERRORÈîôËØØÔºåÂèØÈÄöËøáWSAGetLastError()Ëé∑ÂèñÁõ∏Â∫îÈîôËØØ‰ª£Á†Å
+    int iMode = 0; //1:∑«◊Ë»˚£¨0£∫◊Ë»˚
+    re = ioctlsocket(servSock, FIONBIO, (u_long FAR*) & iMode); //∑«◊Ë»˚…Ë÷√£¨≥…π¶ ∑µªÿ0£¨  ß∞‹∑µªÿSOCKET_ERROR¥ÌŒÛ£¨ø…Õ®π˝WSAGetLastError()ªÒ»°œ‡”¶¥ÌŒÛ¥˙¬Î
     if (re != 0)
     {
         std::cout << "3, re = " << re << ", " << WSAGetLastError() << std::endl;
@@ -45,7 +34,13 @@ int main(){
         return false;
     }
 
-    re = bind(servSock, (SOCKADDR*)&sockAddr, sizeof(SOCKADDR)); ////ÁªëÂÆöÊàêÂäüÔºåËøîÂõû0ÔºåÂ§±Ë¥•ËøîÂõû-1
+    //∞Û∂®Ã◊Ω”◊÷
+    sockaddr_in sockAddr;
+    memset(&sockAddr, 0, sizeof(sockAddr));  //√ø∏ˆ◊÷Ω⁄∂º”√0ÃÓ≥‰
+    sockAddr.sin_family = PF_INET;  // π”√IPv4µÿ÷∑
+    sockAddr.sin_addr.s_addr = inet_addr("127.0.0.1");  //æﬂÃÂµƒIPµÿ÷∑
+    sockAddr.sin_port = htons(1234);  //∂Àø⁄
+    re = bind(servSock, (SOCKADDR*)&sockAddr, sizeof(SOCKADDR)); ////∞Û∂®≥…π¶£¨∑µªÿ0£¨ ß∞‹∑µªÿ-1
     if (re != 0)
     {
         std::cout << "4, re = " << re << ", " << WSAGetLastError() << std::endl;
@@ -53,16 +48,16 @@ int main(){
         return false;
     }
 
-    //ËøõÂÖ•ÁõëÂê¨Áä∂ÊÄÅ
-    re = listen(servSock, 10); //Á¨¨‰∫å‰∏™ÂèÇÊï∞ÔºåÊòØÊúÄÂ§öÈìæÊé•‰∏™Êï∞
+    //Ω¯»Îº‡Ã˝◊¥Ã¨
+    re = listen(servSock, 10); //µ⁄∂˛∏ˆ≤Œ ˝£¨ «◊Ó∂‡¡¥Ω”∏ˆ ˝
     if (re != 0)
     {
         std::cout << "5, re = " << re << ", " << WSAGetLastError() << std::endl;
         system("pause");
         return false;
     }
- 
-    //Êé•Êî∂ÂÆ¢Êà∑Á´ØËØ∑Ê±Ç
+
+    //Ω” ’øÕªß∂À«Î«Û
     sockaddr_in clntAddr;
     int nSize = sizeof(SOCKADDR);
 
@@ -75,27 +70,27 @@ int main(){
         return false;
     }
 #else
-    while (true) //Â§ö‰∏™ÂÆ¢Êà∑Á´ØÈìæÊé•ÊµãËØï
+    while (true) //∂‡∏ˆøÕªß∂À¡¥Ω”≤‚ ‘
     {
-        SOCKET clntSock = accept(servSock, (SOCKADDR*)&clntAddr, &nSize); //ËøîÂõûÂÆ¢Êà∑Á´ØÁöÑÂ•óÊé•Â≠óÔºåÂü∫Êú¨ÁöÑ‰ø°ÊÅØclntAddr
+        SOCKET clntSock = accept(servSock, (SOCKADDR*)&clntAddr, &nSize); //∑µªÿøÕªß∂ÀµƒÃ◊Ω”◊÷£¨ª˘±æµƒ–≈œ¢clntAddr
 
         if (clntSock != INVALID_SOCKET)
         {
-            //ËæìÂá∫ÂÆ¢Êà∑Á´ØÁöÑ‰ø°ÊÅØ
+            // ‰≥ˆøÕªß∂Àµƒ–≈œ¢
             printf("IP: %s, Port: %d\n", inet_ntoa(clntAddr.sin_addr), ntohs(clntAddr.sin_port));
         }
         std::cout << "------------------------------" << std::endl;
     }
 #endif // 0
 
-    //ÂêëÂÆ¢Êà∑Á´ØÂèëÈÄÅÊï∞ÊçÆ
-    const char *str = "Hello World!";
-    re = send(clntSock, str, strlen(str)+sizeof(char), NULL);
+    //œÚøÕªß∂À∑¢ÀÕ ˝æ›
+    const char* str = "Hello World!";
+    re = send(clntSock, str, strlen(str) + sizeof(char), NULL);
     std::cout << "7, re = " << re << ", " << WSAGetLastError() << std::endl;
 
 
 #if 0
-    //Êé•Êî∂ÊúçÂä°Âô®‰º†ÂõûÁöÑÊï∞ÊçÆ
+    //Ω” ’∑˛ŒÒ∆˜¥´ªÿµƒ ˝æ›
     char szBuffer[1024] = { 0 };
     re = recv(clntSock, szBuffer, MAXBYTE, NULL);
     std::cout << "8, re = " << re << ", " << WSAGetLastError() << std::endl;
@@ -106,9 +101,9 @@ int main(){
     {
         memset(szBuffer, 0, 1024);
         re = recv(clntSock, szBuffer, MAXBYTE, NULL);
-        if (re == 0 || re == SOCKET_ERROR) //Âà§Êñ≠ÂØπÊñπÊòØÂê¶ÂÖ≥Èó≠docket
+        if (re == 0 || re == SOCKET_ERROR) //≈–∂œ∂‘∑Ω «∑Òπÿ±’docket
         {
-            std::cout << re << " ÂÆ¢Êà∑Á´ØÈìæÊé•Â∑≤ÁªèÊñ≠ÂºÄ\n";
+            std::cout << re << " øÕªß∂À¡¥Ω”“—æ≠∂œø™\n";
             system("pause");
         }
         printf(szBuffer);
@@ -116,11 +111,11 @@ int main(){
     }
 #endif // 0
 
-    //ÂÖ≥Èó≠Â•óÊé•Â≠ó
+    //πÿ±’Ã◊Ω”◊÷
     closesocket(clntSock);
     closesocket(servSock);
 
-    //ÁªàÊ≠¢ DLL ÁöÑ‰ΩøÁî®
+    //÷’÷π DLL µƒ π”√
     WSACleanup();
     system("pause");
     return 0;
