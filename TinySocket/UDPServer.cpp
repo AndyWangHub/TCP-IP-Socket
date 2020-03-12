@@ -8,6 +8,10 @@ int main() {
     int re = 0;
     WSADATA wsaData;
     re = WSAStartup(MAKEWORD(2, 2), &wsaData);
+    if (re != 0)
+    {
+        return false;
+    }
 
     //´´½¨Ì×½Ó×Ö
     SOCKET sock = socket(AF_INET, SOCK_DGRAM, 0);
