@@ -87,10 +87,10 @@ namespace Socket
 		int nSize = sizeof(SOCKADDR);
 		char buffer[MAX_BUFFER + 1] = { 0 };  //»º³åÇø
 		//memset(buffer, 0, MAX_BUFFER + 1);
-		if (recvfrom(m_socket_server, buffer, MAX_BUFFER, 0, (SOCKADDR*)&clntAddr, &nSize) == -1)
-			return false;
+		int re = recvfrom(m_socket_server, buffer, MAX_BUFFER, 0, (SOCKADDR*)&clntAddr, &nSize);
+		if (re == -1) return false;
 
-		pack.data = buffer;
+		pack.data.assign(buffer, re);
 		pack.address.ip = inet_ntoa(clntAddr.sin_addr);
 		pack.address.port = ntohs(clntAddr.sin_port);
 
