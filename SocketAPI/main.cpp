@@ -12,14 +12,15 @@ int main()
 	Socket::Datagram pack;
 
 	Socket::UDP udp;
-	udp.bind(1024);
+	udp.bind(1234);
 
 	std::thread t(threadFun, &udp);
 
 	while (true)
 	{
 		std::cin >> str;
-		udp.send(ip, prot, str);
+		//udp.send(ip, prot, str);
+		udp.send("127.0.0.1", 2046, str.c_str(), str.size());
 	}
 	
 	t.join();
@@ -37,7 +38,7 @@ void threadFun(Socket::UDP* udp)
 		if (udp->receive(pack))
 		{
 			std::cout << "IP: " << pack.address.ip << "  Prot: " << pack.address.port << std::endl;
-			std::cout << "Date: " << pack.data << std::endl;
+			std::cout << "Date[" <<pack.data.length() << "]: " << pack.data << std::endl;
 		}
 		std::cout << "-----------------------" << std::endl;
 	}
