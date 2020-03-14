@@ -31,10 +31,10 @@ namespace Socket
 
 		void close(); //释放套接口
 		BOOL bind(int prot); //绑定端口
-		INT send(std::string& ip, const int prot, const std::string& data); //发送数据
+		INT send(std::string ip, int prot, std::string& data); //发送数据
 		BOOL receive(Datagram& pack); //接受数据
 	private:
-		BOOL create();
+		BOOL create(); //创建套接口
 	private:
 		SOCKET m_socket_server;
 		BOOL m_binded;
@@ -71,7 +71,7 @@ namespace Socket
 
 		return  m_binded = !::bind(m_socket_server, (SOCKADDR*)&servAddr, sizeof(SOCKADDR));
 	}
-	INT UDP::send(std::string& ip, const int prot, const std::string& data)
+	INT UDP::send(std::string ip, int prot, std::string& data)
 	{
 		sockaddr_in clntAddr;  //客户端地址信息
 		int nSize = sizeof(SOCKADDR);
