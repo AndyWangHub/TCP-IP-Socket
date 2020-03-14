@@ -36,7 +36,7 @@ void threadFun(Socket::UDP* udp)
 	{
 		if (udp->receive(pack))
 		{
-			std::cout << "IP: " << pack.address.ip << "Prot: " << pack.address.port << std::endl;
+			std::cout << "IP: " << pack.address.ip << "  Prot: " << pack.address.port << std::endl;
 			std::cout << "Date: " << pack.data << std::endl;
 		}
 		std::cout << "-----------------------" << std::endl;

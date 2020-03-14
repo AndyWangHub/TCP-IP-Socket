@@ -33,7 +33,8 @@ namespace Socket
 		BOOL bind(int prot); //绑定端口
 		INT send(std::string& ip, const int prot, const std::string& data); //发送数据
 		BOOL receive(Datagram& pack); //接受数据
-
+	private:
+		BOOL create();
 	private:
 		SOCKET m_socket_server;
 		BOOL m_binded;
@@ -44,25 +45,19 @@ namespace Socket
 	UDP::UDP()
 	{
 		this->m_socket_server = INVALID_SOCKET;
-		this->m_binded = true;
-
-		if (WSAStartup(MAKEWORD(2, 2), &m_wsaData) == 0)
-		//创建套接字
-		m_socket_server = socket(AF_INET, SOCK_DGRAM, 0);
-		if (m_socket_server == INVALID_SOCKET)
-			this->m_binded = false;
-		else
-			if (ioctlsocket(m_socket_server, FIONBIO, (u_long FAR*) & iMode) == -1)
-				this->m_binded = false;
+		this->m_binded = create();
 	}
 
 	UDP::~UDP()
 	{
+		if (m_socket_server != INVALID_SOCKET)
+			close();
 	}
 	void UDP::close()
 	{
 		closesocket(m_socket_server);
 		WSACleanup();
+		this->m_socket_server = INVALID_SOCKET;
 	}
 	BOOL UDP::bind(int prot)
 	{
@@ -99,6 +94,19 @@ namespace Socket
 		pack.address.ip = inet_ntoa(clntAddr.sin_addr);
 		pack.address.port = ntohs(clntAddr.sin_port);
 
+		return true;
+	}
+	inline BOOL UDP::create()
+	{
+		if (WSAStartup(MAKEWORD(2, 2), &m_wsaData) != 0)
+			return false;
+			//创建套接字
+			m_socket_server = socket(AF_INET, SOCK_DGRAM, 0);
+		if (m_socket_server == INVALID_SOCKET)
+			return false;
+		else
+			if (ioctlsocket(m_socket_server, FIONBIO, (u_long FAR*) & iMode) == -1)
+				return false;
 		return true;
 	}
 }
