@@ -2,6 +2,7 @@
 #include "Socket.hpp"
 #include <thread>
 
+#if 0
 void threadFun(Socket::UDP* udp);
 
 int main()
@@ -43,3 +44,44 @@ void threadFun(Socket::UDP* udp)
 		std::cout << "-----------------------" << std::endl;
 	}
 }
+
+
+
+#endif // 0
+
+#if 1
+
+void threadFun(Socket::TCPClient* tcpClient);
+
+int main()
+{
+	Socket::TCPClient tcpClient;
+	if (!tcpClient.connect("127.0.0.1", 10246))
+	{
+		std::cout << "Á¬½ÓÊ§°Ü" << std::endl;
+		system("pause");
+	}
+
+	std::thread t(threadFun, &tcpClient);
+
+	std::string str = "123456789";
+	while (true)
+	{
+		std::cin >> str;
+		tcpClient.send(str);
+	}
+
+	system("pause");
+	return 0;
+}
+
+void threadFun(Socket::TCPClient* tcpClient)
+{
+	std::string data;
+	while (true)
+	{
+		tcpClient->receive(data);
+		std::cout << "data[" << data.length() << "]: " << data << std::endl;
+	}
+}
+#endif // 1
