@@ -2,7 +2,7 @@
 #include <winsock2.h>
 #pragma comment (lib, "ws2_32.lib")  //加载 ws2_32.dll
 
-#define BUF_SIZE 100
+#define BUF_SIZE 5
 
 int main() {
     int re = 0;
@@ -22,15 +22,15 @@ int main() {
         return false;
     }
 
-    int iMode = 0; //1:非阻塞，0：阻塞
-    re = ioctlsocket(sock, FIONBIO, (u_long FAR*) & iMode);
+    unsigned long iMode = 0; //1:非阻塞，0：阻塞
+ //   re = ioctlsocket(sock, FIONBIO, (u_long FAR*) & iMode);
 
     //绑定套接字
     sockaddr_in servAddr;
     memset(&servAddr, 0, sizeof(servAddr));  //每个字节都用0填充
     servAddr.sin_family = PF_INET;  //使用IPv4地址
     servAddr.sin_addr.s_addr = htonl(INADDR_ANY); //自动获取IP地址
-    servAddr.sin_port = htons(1234);  //端口
+    servAddr.sin_port = htons(6555);  //端口
     bind(sock, (SOCKADDR*)&servAddr, sizeof(SOCKADDR));
 
     //接收客户端请求
@@ -38,10 +38,12 @@ int main() {
     int nSize = sizeof(SOCKADDR);
     char buffer[BUF_SIZE] = {0};  //缓冲区
     while (1) {
+        int re =ioctlsocket(sock, FIONBIO, (u_long FAR*) & iMode);
+        printf("%d, %d",re,iMode);
         memset(buffer, 0, BUF_SIZE);
-        int strLen = recvfrom(sock, buffer, BUF_SIZE, 0, (SOCKADDR*)&clntAddr, &nSize);
+        int strLen = recvfrom(sock, buffer, BUF_SIZE-1, 0, (SOCKADDR*)&clntAddr, &nSize);
         sendto(sock, buffer, strLen, 0, (SOCKADDR*)&clntAddr, nSize);
-        printf("IP: %s, Port: %d, %s\n", inet_ntoa(clntAddr.sin_addr), ntohs(clntAddr.sin_port), buffer);
+        printf("IP: %s, Port: %d [%d], %s\n", inet_ntoa(clntAddr.sin_addr), ntohs(clntAddr.sin_port), strLen, buffer);
     }
 
     closesocket(sock);

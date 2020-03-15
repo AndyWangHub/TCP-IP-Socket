@@ -97,17 +97,18 @@ int main() {
     std::cout << "8, re = " << re << ", " << WSAGetLastError() << std::endl;
     std::cout << szBuffer << std::endl;
 #else
-    char szBuffer[1024] = { 0 };
+    char szBuffer[4] = { 0 };
     while (true)
     {
-        memset(szBuffer, 0, 1024);
-        re = recv(clntSock, szBuffer, MAXBYTE, NULL);
+        memset(szBuffer, 0, 4);
+        //re = recv(clntSock, szBuffer, MAXBYTE, NULL);
+        re = recv(clntSock, szBuffer, 3, NULL);
         if (re == 0 || re == SOCKET_ERROR) //判断对方是否关闭docket
         {
             std::cout << re << " 客户端链接已经断开\n";
             system("pause");
         }
-        printf(szBuffer);
+        printf("len = %d, %s",re, szBuffer);
         std::cout << std::endl;
     }
 #endif // 0
