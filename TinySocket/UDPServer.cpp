@@ -23,7 +23,7 @@ int main() {
     }
 
     unsigned long iMode = 0; //1:·Ç×èÈû£¬0£º×èÈû
- //   re = ioctlsocket(sock, FIONBIO, (u_long FAR*) & iMode);
+    re = ioctlsocket(sock, FIONBIO, (u_long FAR*) & iMode);
 
     //°ó¶¨Ì×½Ó×Ö
     sockaddr_in servAddr;
@@ -38,7 +38,6 @@ int main() {
     int nSize = sizeof(SOCKADDR);
     char buffer[BUF_SIZE] = {0};  //»º³åÇø
     while (1) {
-        int re =ioctlsocket(sock, FIONBIO, (u_long FAR*) & iMode);
         printf("%d, %d",re,iMode);
         memset(buffer, 0, BUF_SIZE);
         int strLen = recvfrom(sock, buffer, BUF_SIZE-1, 0, (SOCKADDR*)&clntAddr, &nSize);

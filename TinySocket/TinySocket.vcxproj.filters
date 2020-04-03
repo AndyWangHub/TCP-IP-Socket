@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="TCPClient.cpp">
+    <ClCompile Include="UDPServer2.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
