@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="TCPClient.h" />
+    <ClInclude Include="TCPServer.h" />
     <ClInclude Include="UDPServer.h" />
   </ItemGroup>
   <ItemGroup>

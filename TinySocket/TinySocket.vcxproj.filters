@@ -18,6 +18,12 @@
     <ClInclude Include="UDPServer.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="TCPServer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TCPClient.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

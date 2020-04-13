@@ -1,5 +1,6 @@
 #pragma once
 #include<winsock2.h>
+#include <ws2tcpip.h>
 #include<cstdio>
 #include<cstdlib>
 
@@ -7,7 +8,7 @@
 #pragma comment(lib, "Ws2_32.lib")
 
 
-int mainUDPServer()
+int mainUDPServer(int argc, char** argv)
 {
 	int iResult = 0;
 	// If iMode = 0, blocking is enabled; 
