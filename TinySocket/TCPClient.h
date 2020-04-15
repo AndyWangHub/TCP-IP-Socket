@@ -7,18 +7,32 @@
 //Link with ws2_32.lib
 #pragma comment(lib, "Ws2_32.lib")
 
+#define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT "27015"
 
 int mainTCPClient(int argc, char** argv)
 {
-	for (size_t i = 0; i < argc; i++)
-	{
-		printf("%s\n", argv[i]);
-	}
+
 	WSADATA wsaData;
+	SOCKET clieSocket = INVALID_SOCKET;
 
 	int iResult{};
+
+	struct addrinfo* result = NULL,
+		* ptr = NULL,
+		hints;
+
+	const char* sendbuf = "This is a test";
+	char recvbuf[DEFAULT_BUFLEN]{ 0 };
+	int recvbuflen = DEFAULT_BUFLEN;
 	
+	// Validate the parameters
+//	if (argc != 2) 
+	{
+		printf("usage: %s server-name\n", argv[0]);
+//		return 1;
+	}
+
 	//-----------------------------------------------//
 	//Initalize Winsocket
 	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -30,16 +44,16 @@ int mainTCPClient(int argc, char** argv)
 	printf("Windows Sockets is version %d.%d\n", LOBYTE(wsaData.wVersion), HIBYTE(wsaData.wVersion));
 	//-----------------------------------------------//
 	// Resolve the server address and port
-	struct addrinfo* result = NULL,
-		* ptr = NULL,
-		hints;
-
 	ZeroMemory(&hints, sizeof(hints));
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_protocol = IPPROTO_TCP;
 
-	iResult = getaddrinfo(argv[1], DEFAULT_PORT, &hints, &result);
+//	SOCKADDR_IN addr_in;
+//	addr_in.
+	// 本地链接 IPv6 地址. . . . . . . . : fe80::a0b5:c067:eab2:b499%18
+	//IPv4 地址 . . . . . . . . . . . . : 192.168.1.12
+	iResult = getaddrinfo("192.168.1.12", DEFAULT_PORT, &hints, &result);
 	if (iResult != 0)
 	{
 		printf("getaddrinfo failed with error: %d\n", iResult);
@@ -55,14 +69,67 @@ int mainTCPClient(int argc, char** argv)
 		printf("addrlen: %d\n", ptr->ai_addrlen);
 		printf("sin_addr: %s\n", inet_ntoa(((sockaddr_in *)ptr)->sin_addr));
 		printf("sin_por: %d\n", ntohs(((sockaddr_in*)ptr)->sin_port));
-		
+		printf("sin_family: %d\n", ((sockaddr_in*)ptr)->sin_family);	
 		printf("\n");
+
+		//-----------------------------------------------//
+		 // Create a SOCKET for connecting to server
+		clieSocket = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
+		if (clieSocket == INVALID_SOCKET) 
+		{
+			printf("socket failed with error: %ld\n", WSAGetLastError());
+			WSACleanup();
+			return 1;
+		}
+
+		//-----------------------------------------------//
+		// Connect to server
+		iResult = connect(clieSocket, ptr->ai_addr, ptr->ai_addrlen);
+		if (iResult == SOCKET_ERROR) 
+		{
+			closesocket(clieSocket);
+			clieSocket = INVALID_SOCKET;
+			continue;
+		}
+		break;
 	}
 	freeaddrinfo(result);
+
+	if (clieSocket == INVALID_SOCKET) {
+		printf("Unable to connect to server!\n");
+		WSACleanup();
+		return 1;
+	}
+
+	//-----------------------------------------------//
+	// Send an initial buffer
+	iResult = send(clieSocket, sendbuf, (int)strlen(sendbuf), 0);
+	if (iResult == SOCKET_ERROR) {
+		printf("send failed with error: %d\n", WSAGetLastError());
+		closesocket(clieSocket);
+		WSACleanup();
+		return 1;
+	}
+	printf("Bytes Sent: %ld\n", iResult);
+	//-----------------------------------------------//
+	 // Receive until the peer closes the connection
+	do {
+
+		iResult = recv(clieSocket, recvbuf, recvbuflen, 0);
+		if (iResult > 0)
+			printf("Bytes received: %d\n", iResult);
+		else if (iResult == 0)
+			printf("Connection closed\n");
+		else
+			printf("recv failed with error: %d\n", WSAGetLastError());
+
+	} while (iResult > 0);
 
 	//-----------------------------------------------//
 	//Clean up and exit
 	printf("Exiting.\n");
+	closesocket(clieSocket);
 	WSACleanup();
+
 	return 0;
 }
