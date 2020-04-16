@@ -20,12 +20,16 @@ using namespace std;
 
 #include"UDPServer.h"
 #include"TCPClient.h"
+#include"TCPServer.h"
 
 int main(int argc, char** argv)
 {
 	//mainUDPServer(argc, argv);
-	mainTCPClient(argc, argv);
+	//mainTCPClient(argc, argv);
+	mainTCPServer(argc, argv);
 
-	system("pause");
-	return 0;
+  
+        system("pause");
+        return 0;
+   
 }

@@ -1,11 +1,15 @@
 #pragma once
 #include<winsock2.h>
-#include <ws2tcpip.h>
+#include<ws2tcpip.h>
+#include<ip2string.h>
 #include<cstdio>
 #include<cstdlib>
 
 //Link with ws2_32.lib
 #pragma comment(lib, "Ws2_32.lib")
+
+//库文件是Ntdll.dll和Ntdll.lib
+#pragma comment(lib,"Ntdll.lib")
 
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT "27015"
@@ -27,10 +31,10 @@ int mainTCPClient(int argc, char** argv)
 	int recvbuflen = DEFAULT_BUFLEN;
 	
 	// Validate the parameters
-//	if (argc != 2) 
+	if (argc != 2) 
 	{
 		printf("usage: %s server-name\n", argv[0]);
-//		return 1;
+		return 1;
 	}
 
 	//-----------------------------------------------//
@@ -53,7 +57,17 @@ int mainTCPClient(int argc, char** argv)
 //	addr_in.
 	// 本地链接 IPv6 地址. . . . . . . . : fe80::a0b5:c067:eab2:b499%18
 	//IPv4 地址 . . . . . . . . . . . . : 192.168.1.12
-	iResult = getaddrinfo("192.168.1.12", DEFAULT_PORT, &hints, &result);
+	char hostname[255] = { 0 }; //主机名   
+	iResult = gethostname(hostname, sizeof(hostname));
+	if (iResult == SOCKET_ERROR)
+	{
+		printf("gethostname failed with error: %d\n", iResult);
+		WSACleanup();
+		return 1;
+	}
+	
+	printf("hostname = %s\n", hostname);
+	iResult = getaddrinfo(argv[1], DEFAULT_PORT, &hints, &result);
 	if (iResult != 0)
 	{
 		printf("getaddrinfo failed with error: %d\n", iResult);
@@ -67,9 +81,25 @@ int mainTCPClient(int argc, char** argv)
 		printf("socktype: %d\n", ptr->ai_socktype);
 		printf("protocol: %d\n", ptr->ai_protocol);
 		printf("addrlen: %d\n", ptr->ai_addrlen);
-		printf("sin_addr: %s\n", inet_ntoa(((sockaddr_in *)ptr)->sin_addr));
-		printf("sin_por: %d\n", ntohs(((sockaddr_in*)ptr)->sin_port));
-		printf("sin_family: %d\n", ((sockaddr_in*)ptr)->sin_family);	
+		if (ptr->ai_family == AF_INET)
+		{
+			sockaddr_in* paddr_in = (sockaddr_in*)(ptr->ai_addr);
+			printf("sin_addr: %s\n", inet_ntoa(paddr_in->sin_addr));
+			printf("sin_por: %d\n", ntohs(paddr_in->sin_port));
+			printf("sin_family: %d\n", (paddr_in->sin_family));
+		}
+		else if (ptr->ai_family == AF_INET6)
+		{
+			const sockaddr_in6* paddr_in6 = (sockaddr_in6*)ptr->ai_addr;
+			char ip6[100] = { 0 };
+			RtlIpv6AddressToStringA(&(paddr_in6->sin6_addr), ip6);
+			printf("sin_addr: %s\n", ip6);
+			printf("sin_por: %d\n", ntohs(paddr_in6->sin6_port));
+			printf("sin_family: %d\n", (paddr_in6->sin6_family));
+
+			char bu6[10] = { 'a','%',9};
+			printf("%s\n", bu6);
+		}
 		printf("\n");
 
 		//-----------------------------------------------//
@@ -84,6 +114,7 @@ int mainTCPClient(int argc, char** argv)
 
 		//-----------------------------------------------//
 		// Connect to server
+		//iResult = connect(clieSocket, ptr->ai_addr, ptr->ai_addrlen);
 		iResult = connect(clieSocket, ptr->ai_addr, ptr->ai_addrlen);
 		if (iResult == SOCKET_ERROR) 
 		{
@@ -92,6 +123,7 @@ int mainTCPClient(int argc, char** argv)
 			continue;
 		}
 		break;
+
 	}
 	freeaddrinfo(result);
 
