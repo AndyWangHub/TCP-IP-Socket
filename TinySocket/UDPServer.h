@@ -137,9 +137,11 @@ int mainUDPServer(int argc, char** argv)
 		printf("closesocket failed with error %d\n", WSAGetLastError());
 		return 1;
 	}
+
 	//-----------------------------------------------//
 	//Clean up and exit
 	printf("Exiting.\n");
+	closesocket(serv_socket);
 	WSACleanup();
 	return 0;
 }

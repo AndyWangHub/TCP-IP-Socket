@@ -8,7 +8,7 @@
 //Link with ws2_32.lib
 #pragma comment(lib, "Ws2_32.lib")
 
-//库文件是Ntdll.dll和Ntdll.lib
+//Link with Ntdll.dll和Ntdll.lib
 #pragma comment(lib,"Ntdll.lib")
 
 #define DEFAULT_BUFLEN 512

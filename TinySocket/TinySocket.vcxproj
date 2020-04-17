@@ -22,6 +22,7 @@
     <ClInclude Include="TCPClient.h" />
     <ClInclude Include="TCPServer.h" />
     <ClInclude Include="UDPServer.h" />
+    <ClInclude Include="UDPServer2.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
