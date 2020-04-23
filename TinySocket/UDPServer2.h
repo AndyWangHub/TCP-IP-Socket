@@ -52,7 +52,7 @@ int mainUDPServer2(int argc,char * argv[])
 	hints.ai_socktype = SOCK_DGRAM;
 	hints.ai_protocol = IPPROTO_UDP;
 
-	iResult = getaddrinfo(hostname, NULL, &hints, &result);
+	iResult = getaddrinfo(NULL, DEFAULT_PORT, &hints, &result);
 	if (iResult != 0)
 	{
 		printf("getaddrinfo failed with error: %d\n", iResult);

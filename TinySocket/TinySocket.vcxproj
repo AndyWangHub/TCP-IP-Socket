@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MulticasServer.h" />
+    <ClInclude Include="MulticastClient.h" />
     <ClInclude Include="TCPClient.h" />
     <ClInclude Include="TCPServer.h" />
     <ClInclude Include="UDPServer.h" />

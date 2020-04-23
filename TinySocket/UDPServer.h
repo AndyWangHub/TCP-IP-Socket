@@ -66,6 +66,34 @@ int mainUDPServer(int argc, char** argv)
 		WSACleanup();
 		return 1;
 	}
+	//********************************************************
+	BOOL bOptVal = FALSE;
+	int bOptLen = sizeof(BOOL);
+
+	int iOptVal = 0;
+	int iOptLen = sizeof(int);
+
+	iResult = getsockopt(serv_socket, SOL_SOCKET, SO_KEEPALIVE, (char*)&iOptVal, &iOptLen);
+	if (iResult == SOCKET_ERROR) {
+		wprintf(L"getsockopt for SO_KEEPALIVE failed with error: %u\n", WSAGetLastError());
+	}
+	else
+		wprintf(L"SO_KEEPALIVE Value: %ld\n", iOptVal);
+
+	iResult = setsockopt(serv_socket, SOL_SOCKET, SO_KEEPALIVE, (char*)&bOptVal, bOptLen);
+	if (iResult == SOCKET_ERROR) {
+		wprintf(L"setsockopt for SO_KEEPALIVE failed with error: %u\n", WSAGetLastError());
+	}
+	else
+		wprintf(L"Set SO_KEEPALIVE: ON\n");
+
+	iResult = getsockopt(serv_socket, SOL_SOCKET, SO_KEEPALIVE, (char*)&iOptVal, &iOptLen);
+	if (iResult == SOCKET_ERROR) {
+		wprintf(L"getsockopt for SO_KEEPALIVE failed with error: %u\n", WSAGetLastError());
+	}
+	else
+		wprintf(L"SO_KEEPALIVE Value: %ld\n", iOptVal);
+
 	//-----------------------------------------------//
 	//Get socket local address information
 	iResult = getsockname(serv_socket, (PSOCKADDR)&addr_in, &addr_in_size);

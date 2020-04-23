@@ -53,7 +53,7 @@ void threadFun(Socket::UDP* udp)
 
 void threadFun(Socket::TCPClient* tcpClient);
 
-int main()
+int main02()
 {
 	Socket::TCPClient tcpClient;
 	if (!tcpClient.connect("127.0.0.1", 10246))

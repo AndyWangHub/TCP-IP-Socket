@@ -22,13 +22,18 @@ using namespace std;
 #include"UDPServer2.h"
 #include"TCPClient.h"
 #include"TCPServer.h"
+#include"MulticastClient.h"
+#include"MulticasServer.h"
 
 int main(int argc, char** argv)
 {
+
     //mainUDPServer(argc, argv);
-    mainUDPServer2(argc, argv);
-    //mainTCPClient(argc, argv);
+    //mainUDPServer2(argc, argv);
+    mainTCPClient(argc, argv);
     //mainTCPServer(argc, argv);
+    //MulticastClient();
+    //MulticasServer();
 
 
     system("pause");
