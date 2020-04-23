@@ -2,13 +2,15 @@
 #define _SOCKET_HPP_
 
 #include<iostream>
-#include <stdio.h>
+#include<exception>
+#include<cstdio>
+#include<string>
 #include<WinSock2.h>
 #pragma comment (lib, "ws2_32.lib")  //加载 ws2_32.dll
 
 namespace Socket
 {
-	constexpr auto MAX_BUFFER = 2046;
+	constexpr auto MAX_BUFFER = 1024;
 	constexpr auto iMode = 0; //1:非阻塞，0：阻塞
 
 	typedef struct
@@ -23,6 +25,18 @@ namespace Socket
 		std::string data;
 	}Datagram;
 
+	class Exception
+	{
+	private:
+		int m_error_code;
+		std::string m_message;
+	public:
+		Exception(std::string error,int error_code = 0)
+			:m_message(error),m_error_code(error_code){}
+		virtual const char* what()
+		{return (m_message + std::to_string(m_error_code)).c_str();}
+	};
+
 	class UDP
 	{
 	public:
@@ -30,13 +44,14 @@ namespace Socket
 		~UDP();
 
 		void close(); //释放套接口
-		BOOL bind(int prot); //绑定端口
+		void bind(int prot); //绑定端口
 		INT send(std::string ip, int prot, std::string& data); //发送数据
 		INT send(const char* ip, int prot, const char* data, int len); //发送数据
-		BOOL receive(Datagram& pack); //接受数据
+		void receive(Datagram& pack); //接受数据
 	private:
-		BOOL create(); //创建套接口
+		void create(); //创建套接口
 	private:
+		int iResult;
 		SOCKET m_socket;
 		BOOL m_binded;
 
@@ -46,7 +61,8 @@ namespace Socket
 	UDP::UDP()
 	{
 		this->m_socket = INVALID_SOCKET;
-		this->m_binded = create();
+		this->m_binded = false;
+		create();
 	}
 
 	UDP::~UDP()
@@ -60,17 +76,16 @@ namespace Socket
 		WSACleanup();
 		m_socket = INVALID_SOCKET;
 	}
-	BOOL UDP::bind(int prot)
+	void UDP::bind(int prot)
 	{
-		if (!m_binded) return false;
-
 		sockaddr_in servAddr;
 		memset(&servAddr, 0, sizeof(servAddr));  //每个字节都用0填充
 		servAddr.sin_family = PF_INET;  //使用IPv4地址
 		servAddr.sin_addr.s_addr = htonl(INADDR_ANY); //自动获取IP地址
 		servAddr.sin_port = htons(1234);  //端口
 
-		return  m_binded = !::bind(m_socket, (SOCKADDR*)&servAddr, sizeof(SOCKADDR));
+		iResult = ::bind(m_socket, (SOCKADDR*)&servAddr, sizeof(SOCKADDR));
+		if (iResult != 0)throw Exception("[bind] failed with error", WSAGetLastError());
 	}
 	INT UDP::send(std::string ip, int prot, std::string& data)
 	{
@@ -80,7 +95,10 @@ namespace Socket
 		clntAddr.sin_addr.s_addr = inet_addr(ip.c_str()); 
 		clntAddr.sin_port = htons(prot);  //端口
 
-		return sendto(m_socket, data.c_str(), data.length(), 0, (SOCKADDR*)&clntAddr, nSize);
+		iResult = sendto(m_socket, data.c_str(), data.length(), 0, (SOCKADDR*)&clntAddr, nSize);
+		if (iResult == SOCKET_ERROR) throw Exception("[send] failed with error", WSAGetLastError());
+
+		return iResult;
 	}
 	INT UDP::send(const char* ip, int prot, const char* data, int len)
 	{
@@ -90,35 +108,43 @@ namespace Socket
 		clntAddr.sin_addr.s_addr = inet_addr(ip);
 		clntAddr.sin_port = htons(prot);  //端口
 
-		return sendto(m_socket, data, len, 0, (SOCKADDR*)&clntAddr, nSize);
+		iResult = sendto(m_socket, data, len, 0, (SOCKADDR*)&clntAddr, nSize);
+		if (iResult == SOCKET_ERROR) throw Exception("[send] failed with error", WSAGetLastError());
+
+		return iResult;
 	}
-	BOOL UDP::receive(Datagram& pack)
+	void UDP::receive(Datagram& pack)
 	{
 		sockaddr_in clntAddr;
 		int nSize = sizeof(SOCKADDR);
 		char buffer[MAX_BUFFER] = { 0 };  //缓冲区
 		//memset(buffer, 0, MAX_BUFFER + 1);
-		int re = recvfrom(m_socket, buffer, MAX_BUFFER, 0, (SOCKADDR*)&clntAddr, &nSize);
-		if (re == -1) return false;
-		
-		pack.data.assign(buffer, re);
+		iResult = recvfrom(m_socket, buffer, MAX_BUFFER, 0, (SOCKADDR*)&clntAddr, &nSize);
+		if (iResult == SOCKET_ERROR && WSAGetLastError() != WSAEWOULDBLOCK)
+		{
+			if (WSAGetLastError() == WSAEMSGSIZE)
+				throw Exception("[receive] The datagram is larger than the length of the buffer", WSAGetLastError());
+		//	else if (WSAGetLastError() == WSAEWOULDBLOCK)
+		//		throw Exception("[receive] The socket is marked as nonblocking and the recvfrom operation would block", WSAGetLastError());
+			else
+				throw Exception("[receive] failed with error", WSAGetLastError());
+		}
+		pack.data.assign(buffer, iResult);
 		pack.address.ip = inet_ntoa(clntAddr.sin_addr);
 		pack.address.port = ntohs(clntAddr.sin_port);
 
-		return true;
 	}
-	inline BOOL UDP::create()
+	inline void UDP::create()
 	{
-		if (WSAStartup(MAKEWORD(2, 2), &m_wsaData) != 0)
-			return false;
+		iResult = WSAStartup(MAKEWORD(2, 2), &m_wsaData);
+		if (iResult != 0)throw Exception("[WSAStartup] failed with error", iResult);
 			//创建套接字
-			m_socket = socket(AF_INET, SOCK_DGRAM, 0);
+		m_socket = socket(AF_INET, SOCK_DGRAM, 0);
 		if (m_socket == INVALID_SOCKET)
-			return false;
-		else
-			if (ioctlsocket(m_socket, FIONBIO, (u_long FAR*) & iMode) == -1)
-				return false;
-		return true;
+			throw Exception("[socket] failed with error", WSAGetLastError());
+
+		if (ioctlsocket(m_socket, FIONBIO, (u_long FAR*) & iMode) == -1)
+			throw Exception("[ioctlsocket] failed with error", WSAGetLastError());
 	}
 
 
