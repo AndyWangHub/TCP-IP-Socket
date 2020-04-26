@@ -25,16 +25,23 @@ using namespace std;
 #include"MulticastClient.h"
 #include"MulticasServer.h"
 
+
+const char* inet_string(u_long addr)
+{
+    IN_ADDR sin_addr;
+    sin_addr.S_un.S_addr = addr;
+    return inet_ntoa(sin_addr);
+}
+
 int main(int argc, char** argv)
 {
 
     //mainUDPServer(argc, argv);
     //mainUDPServer2(argc, argv);
-    mainTCPClient(argc, argv);
+    //mainTCPClient(argc, argv);
     //mainTCPServer(argc, argv);
     //MulticastClient();
     //MulticasServer();
-
 
     system("pause");
     return 0;

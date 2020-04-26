@@ -12,6 +12,7 @@ namespace Socket
 {
 	constexpr auto MAX_BUFFER = 1024;
 	constexpr auto iMode = 0; //1:非阻塞，0：阻塞
+	constexpr auto prot = 2046;
 
 	typedef struct
 	{
@@ -24,6 +25,13 @@ namespace Socket
 		Address address;
 		std::string data;
 	}Datagram;
+
+	const char* u_long_to_string(u_long addr)
+	{
+		IN_ADDR sin_addr;
+		sin_addr.S_un.S_addr = addr;
+		return inet_ntoa(sin_addr);
+	}
 
 	class Exception
 	{
@@ -44,7 +52,7 @@ namespace Socket
 		~UDP();
 
 		void close(); //释放套接口
-		void bind(int prot); //绑定端口
+		void bind(int prot = prot, const char* ip = u_long_to_string(htonl(INADDR_ANY))); //绑定端口
 		INT send(std::string ip, int prot, std::string& data); //发送数据
 		INT send(const char* ip, int prot, const char* data, int len); //发送数据
 		void receive(Datagram& pack); //接受数据
@@ -76,17 +84,19 @@ namespace Socket
 		WSACleanup();
 		m_socket = INVALID_SOCKET;
 	}
-	void UDP::bind(int prot)
+
+	inline void UDP::bind(int prot, const char* ip)
 	{
 		sockaddr_in servAddr;
 		memset(&servAddr, 0, sizeof(servAddr));  //每个字节都用0填充
 		servAddr.sin_family = PF_INET;  //使用IPv4地址
-		servAddr.sin_addr.s_addr = htonl(INADDR_ANY); //自动获取IP地址
+		servAddr.sin_addr.s_addr = inet_addr(ip);//htonl(INADDR_ANY); //自动获取IP地址
 		servAddr.sin_port = htons(1234);  //端口
 
 		iResult = ::bind(m_socket, (SOCKADDR*)&servAddr, sizeof(SOCKADDR));
 		if (iResult != 0)throw Exception("[bind] failed with error", WSAGetLastError());
 	}
+
 	INT UDP::send(std::string ip, int prot, std::string& data)
 	{
 		sockaddr_in clntAddr;  //客户端地址信息

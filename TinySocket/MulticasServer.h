@@ -21,12 +21,12 @@ int MulticasServer()
 	addr.sin_port = htons(65000);
 
 	//套接字设为可重用
-	bool bOptval = true;
+	bool bOptval = true;/*
 	iRet = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&bOptval, sizeof(bOptval));
 	if (iRet != 0) {
 		printf("setsockopt fail:%d", WSAGetLastError());
 		return -1;
-	}
+	}*/
 	//禁止组播数据回送
 	iRet = setsockopt(sock, IPPROTO_IP, IP_MULTICAST_LOOP,
 		(char*)&bOptval, sizeof(bOptval));
@@ -46,7 +46,7 @@ int MulticasServer()
 	ip_mreq multiCast;
 	multiCast.imr_interface.S_un.S_addr = INADDR_ANY;
 	//multiCast.imr_interface.S_un.S_addr = inet_addr("192.168.1.14");
-	multiCast.imr_multiaddr.S_un.S_addr = inet_addr("234.2.2.2");
+	multiCast.imr_multiaddr.S_un.S_addr = inet_addr("224.1.1.1");
 	iRet = setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char*)&multiCast, sizeof(multiCast));
 	if (iRet != 0) {
 		printf("setsockopt fail:%d", WSAGetLastError());
